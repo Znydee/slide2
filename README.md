@@ -1,2 +1,2 @@
 # slide2
-This is thedame social media app as "slide" above but django-notifications is used in the chatapp in place of django channels
+This is thesame social media app as "slide" above but in this, django-notifications was  implemented in the chatapp in place of django channels.
