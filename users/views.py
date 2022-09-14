@@ -74,13 +74,57 @@ def home(request):
 #                pass
 #            else:
 #                friends_suggestion.append(f)
-    print(users_friends_user_id_list,"home")
+    #print(users_friends_user_id_list,"home")
     return render(request,"users/index.html",{"page_obj":page_obj,"form":form,"user_liked_post":user_liked_post,"friends_suggestion":friends_suggestion,"users_requests":users_requests,"users_requests_already_sent":users_requests_already_sent,"users_requests_already_recieved":users_requests_already_recieved})
 
+def get_friends(request):
+    n= Notification.objects.filter(recipient=request.user, verb="new friend request")
+    n.delete()
+    friends_suggestion = []
+    all_users= list(User.objects.all().values_list("id",flat = True))
+    #friend_requests_sent= FriendRequests.objects.filter(sent_from=request.user).values()
+    users_friends_user_id_list= list(request.user.friends_list.exclude(id=request.user.id).values_list("id",flat = True))
+    friends_suggestion= list(User.objects.exclude(id= request.user.id).exclude(id__in=users_friends_user_id_list).values_list("id",flat=True))
+    print(users_friends_user_id_list)
+    print(all_users)
+    print(friends_suggestion)
+    users_requests_already_sent = list(FriendRequests.objects.filter(sent_from=request.user).values_list("sent_to_id",flat= True))
+    print(users_requests_already_sent)
+    users_requests_already_recieved = list(FriendRequests.objects.filter(sent_to=request.user).values_list("sent_from_id",flat= True))
+    print(users_requests_already_recieved)
+    suggested_friends_profile  = list(Profile.objects.filter(user_id__in = friends_suggestion).values("slug","profile_image","user_id"))
+   # print(friends_suggestion)
+    #all_users= User.objects.all().values()
+#    friend_requests_sent= FriendRequests.objects.filter(sent_from=request.user).values()
+#    users_friends= request.user.friends_list.exclude(user=request.user).values()
+#    users_friends_user_list = [request.user.username]
+#    users_friends_user_id_list = [request.user.id]
+#    friend_suggestion_list=[]
+#    print(users_friends)()
+#    for friend in users_friends:
+#        users_friends_user_list.append(friend.user.username)
+#        users_friends_user_id_list.append(friend.user.id)
+#    friends_suggestion= User.objects.exclude(username__in=users_friends_user_list).values()
+#    users_requests_already_sent=[]
+#    users_requests_already_recieved=[]
+#    users_requests_sent_to=FriendRequests.objects.filter(sent_from=request.user).values()
+#    users_requests_recieved_from=FriendRequests.objects.filter(sent_to=request.user).values()
+#    for item in users_requests_sent_to:
+#        users_requests_already_sent.append(item.sent_to)
+#    for item in users_requests_recieved_from:
+#        users_requests_already_recieved.append(item.sent_from)     
+#    users_requests=FriendRequests.objects.filter(sent_from=request.user)|FriendRequests.objects.filter(sent_to=request.user).order_by("-time_sent")
+    return JsonResponse({"suggested_friends_profile":suggested_friends_profile,"users_requests_already_sent":users_requests_already_sent,"users_requests_already_recieved":users_requests_already_recieved}, safe=False)
+    #print(type(friends_suggestion))
+#    print(type(users_requests_already_sent))
+#    print(type(users_requests_already_recieved))
+#    return HttpResponse("done")
+    
 def mark_posts_as_seen(request):
     n= Notification.objects.filter(recipient=request.user, verb="new post")
     n.mark_all_as_read()
     return HttpResponse("done")
+    
 def get_all_notifications(request):
     all_notifications=request.user.notifications.all()
     all_notifications=list(all_notifications.values())
@@ -191,6 +235,7 @@ def send_friend_request(request):
     #print(pik)
     f_request=FriendRequests(sent_from=request.user,sent_to=user)
     f_request.save()
+    notify.send(sender = request.user, recipient = user, verb="new friend request")
     return HttpResponse("done")
     
 def cancel_friend_request(request):
@@ -199,6 +244,8 @@ def cancel_friend_request(request):
  #   users_requests=FriendRequests.objects.filter(sent_from=request.user)&FriendRequests.objects.filter(sent_to=user)
     users_requests=FriendRequests.objects.get(sent_from=request.user, sent_to=user)
     users_requests.delete()
+    n= Notification.objects.filter(actor_object_id=request.user.id,recipient=user, verb="new friend request")
+    n.delete()
     return HttpResponse("done")
 def make_post(request):
     if request.method=="POST":
@@ -216,11 +263,15 @@ def accept_friend_request(request):
     request.user.profile.friends.add(user1)
     user1.profile.friends.add(request.user)
     req= FriendRequests.objects.filter(sent_from=user1, sent_to=request.user).delete()
+    n= Notification.objects.filter(actor_object_id=user1.id,recipient=request.user, verb="new friend request")
+    n.delete()
     return HttpResponse("done")
     
 def decline_friend_request(request):  
     user1=get_object_or_404(User,username=request.GET["username"])
     req= FriendRequests.objects.filter(sent_from=user1, sent_to=request.user).delete()
+    n= Notification.objects.filter(actor_object_id=user1.id,recipient=request.user, verb="new friend request")
+    n.delete()
     return HttpResponse("done")
   
 def register(request):    

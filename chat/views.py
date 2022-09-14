@@ -15,12 +15,14 @@ def home(request):
     
 def get_message(request):
     username = request.GET["username"]
+    #print("------------------+±+++_-------------_------------")
+    #print(request.GET)
     ins = User.objects.get(username=username)
     messages = Message.objects.filter(sender=request.user, reciever = ins)|Message.objects.filter(reciever=request.user, sender = ins)
     messages = messages.order_by("timestamp")
     messages=list(messages.values())
     Notification.objects.filter(actor_object_id=ins.id, recipient=request.user,verb="new message").mark_all_as_read()
-    print("message about to be gotten")
+    #print("message about to be gotten")
     return JsonResponse({"messages": messages})
     
 def register(request):    

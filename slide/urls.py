@@ -24,26 +24,26 @@ import notifications.urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
-     path('chat', include('chat.urls')),
+     path('chat/', include('chat.urls')),
     path('login/',auth_views.LoginView.as_view(template_name="users/login.html"),name="login"),
     
-    path('logout',auth_views.LogoutView.as_view(template_name="users/logout.html"),name="logout"),
+    path('logout/',auth_views.LogoutView.as_view(template_name="users/logout.html"),name="logout"),
     path('profileupdate/',profileupdate,name="profileupdate" ),
-    path('register',register,name="register"),
-    path('sendrequest',send_friend_request,name="send-request"),
-    path('cancelrequest',cancel_friend_request,name="cancel-request"),
-    path('acceptrequest',accept_friend_request,name="accept-request"),
-    path('declinerequest', decline_friend_request,name="decline-request"),
-    path('likepost', like_post,name="like-post"),
+    path('register/',register,name="register"),
+    path('sendrequest/',send_friend_request,name="send-request"),
+    path('cancelrequest/',cancel_friend_request,name="cancel-request"),
+    path('acceptrequest/',accept_friend_request,name="accept-request"),
+    path('declinerequest/', decline_friend_request,name="decline-request"),
+    path('likepost/', like_post,name="like-post"),
     path('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
-    path('readnotification', notifications_as_read,name="mark-notification-as-read"),
-    path('getallnotifications', get_all_notifications,name="get-all-notifications"),
+    path('readnotification/', notifications_as_read,name="mark-notification-as-read"),
+    path('getallnotifications/', get_all_notifications,name="get-all-notifications"),
     path("password-reset/",auth_views.PasswordResetView.as_view(template_name="users/password_reset.html") , name="password_reset"),
-    path("password-reset/done",auth_views.PasswordResetDoneView.as_view(template_name="users/password_reset_done.html") , name="password_reset_done"),
-    path("password-reset-confirm/<uidb64>/<token>",auth_views.PasswordResetConfirmView.as_view(template_name="users/password_reset_confirm.html") , name="password_reset_confirm"),
+    path("password-reset/done/",auth_views.PasswordResetDoneView.as_view(template_name="users/password_reset_done.html") , name="password_reset_done"),
+    path("password-reset-confirm/<uidb64>/<token>/",auth_views.PasswordResetConfirmView.as_view(template_name="users/password_reset_confirm.html") , name="password_reset_confirm"),
     path("password-reset-complete/",auth_views.PasswordResetCompleteView.as_view(template_name="users/password_reset_complete.html") , name="password_reset_complete"),
-    path('mark_specific_as_read',mark_specific_as_read,name="message_as_read"),
+    path('mark_specific_as_read/',mark_specific_as_read,name="message_as_read"),
 ]
-
-if settings.DEBUG:
-        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+#if settings.DEBUG:
+#        urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

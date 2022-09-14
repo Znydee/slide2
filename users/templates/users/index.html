@@ -180,6 +180,35 @@
             contentSelector: '.stream-post,.pagination'
         });
     });
+    $(document).on("click","#profile-tab",function(){
+    //alert("profile tab");
+    $(".ntf-circle").remove();
+   // $('#profile').empty();
+    $.ajax(
+    {
+        type:"GET",
+        url: "{% url 'get-friends' %}",
+        success: function(data) 
+        {
+           // alert("post seen");
+           alert(JSON.stringify(data));
+           var profiles = data.suggested_friends_profile;
+ var users_requests_already_recieved = data["users_requests_already_recieved"];
+   var users_requests_already_sent = data["users_requests_already_sent"];
+   //  alert(profiles);
+    for (let item in profiles){
+    $("#profile").append(`<div class="row"> <div class="col-md-8"><div class="people-nearby"> <div class="nearby-user"> <div class="row ml-3"> <div class="col-md-2 col-sm-2"> <img src="{% get_media_prefix %}default.jpg" alt="user" class="profile-photo-lg"></div><div class="col-md-4 col-sm-4"><h5><a href="#" class="profile-link">${profiles[item].slug}</a></h5> <button class="sbtn btn-primary btn pull-left"  id="ad${profiles[item].slug}">Add Friend</button></div></div></div></div></div></div>`);
+     };
+        }
+     });  
+     //alert("heyy");
+     //var profiles = data.suggested_friends_profile;
+ //   var users_requests_already_recieved = data["users_requests_already_recieved"];
+   //  var users_requests_already_sent = data["users_requests_already_sent"];
+   //  alert(profiles);
+   //  for (let item in profiles){
+    // alert("heyy");};
+    });
     $(document).on("dblclick","#home-tab",function(){
          //   alert("home");         
             location.reload()
@@ -248,7 +277,7 @@
     $(document).on("click",".sbtn",function(){
         var elmId = $(this).attr("id");
         var elmIdd = elmId.substring(2) ;
-     
+     alert(elmId)
         $.ajax(
     {
         type:"GET",

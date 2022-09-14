@@ -18,6 +18,6 @@ from django.urls import path
 from  .views import home,get_message,send_message
 urlpatterns = [
     path('',home,name="chat-home"),
-      path('getmessage/', get_message, name = "getmessage"),
+      path('getmessage', get_message, name = "getmessage"),
         path('sendmessage/', send_message, name = "sendmessage"),
 ]

@@ -6,7 +6,8 @@ from . import views
 
 urlpatterns = [
     path('',views.home,name="slide-home" ),
-    path('/mark_post_as_seen',views.mark_posts_as_seen,name="mark-post" ),
+    path('get_friends',views.get_friends,name="get-friends" ),
+    path('mark_post_as_seen/',views.mark_posts_as_seen,name="mark-post" ),
     path('profiles/<slug>/',views.profile,name="profile" ),
     path('<slug>/<id>/',views.detailedpost,name="detailed-post" ),
     ]
