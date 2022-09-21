@@ -10,7 +10,9 @@ from notifications.signals import notify
 # Create your views here.
 @login_required
 def home(request):
-    people=User.objects.all()
+    #people=User.objects.all()
+    people = request.user.friends_list.all()
+    print(people)
     return render(request,"chat/index.html",{"people":people})
     
 def get_message(request):

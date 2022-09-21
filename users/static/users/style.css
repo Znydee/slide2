@@ -1,3 +1,6 @@
+* {
+      touch-action: manipulation;
+  }
 .divider:after,
 .divider:before {
 content: "";

@@ -1,3 +1,6 @@
+* {
+      touch-action: manipulation;
+  }
 body{margin-top:20px;}
 
 /*==================================================

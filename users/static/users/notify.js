@@ -96,7 +96,6 @@ for(let item in notification_list){
   }
   }
   else if(notification_list[item].verb == "new friend request"){
-  alert("new friend request");
    if($(".fr-circle")[0]){}else{
   $(".fa-user-plus").append('<sup><i class="fa fa-circle fr-circle" aria-hidden="true"></i></sup>');
   }

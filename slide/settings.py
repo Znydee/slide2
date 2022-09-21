@@ -14,6 +14,9 @@ from pathlib import Path
 import django_heroku
 import dj_database_url
 import os
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'notifications',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -135,8 +139,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ASGI_APPLICATION = 'slide.asgi.application'
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'media') 
 
-MEDIA_URL = 'media/'
-
+#MEDIA_URL = 'media/'
+MEDIA_URL = ''
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_URL = "login"
@@ -166,3 +170,9 @@ EMAIL_HOST_PASSWORD = ""
 #>>>>>>> 09d6fee (implementing realtime chatapp)
 django_heroku.settings(locals())
 #'127.0.0.1' '197.211.61.57'
+
+cloudinary.config( 
+  cloud_name = "dkxrj5brj", 
+  api_key = "921141168666277", 
+  api_secret = "_ePLDyUOhVldqDeU0TYZWGN8NPA" 
+)

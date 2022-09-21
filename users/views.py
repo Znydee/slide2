@@ -10,6 +10,8 @@ from notifications.models import Notification
 from django.utils.timesince import timesince
 from django.core.paginator import Paginator
 import json
+import cloudinary
+import cloudinary.uploader
 # Create your views here.
 @login_required
 def home(request):
@@ -75,45 +77,34 @@ def home(request):
 #            else:
 #                friends_suggestion.append(f)
     #print(users_friends_user_id_list,"home")
+    #cloudinary.CloudinaryImage("non_existing_id.png").image(default_image="Capture.JPG")
+    #cloudinary.CloudinaryImage("non_existing_id.png").image(default_image="http://res.cloudinary.com/dkxrj5brj/image/upload/v1663698886/profile_images/tafsxzmau7bacj7rheaz.jpg")
     return render(request,"users/index.html",{"page_obj":page_obj,"form":form,"user_liked_post":user_liked_post,"friends_suggestion":friends_suggestion,"users_requests":users_requests,"users_requests_already_sent":users_requests_already_sent,"users_requests_already_recieved":users_requests_already_recieved})
 
 def get_friends(request):
     n= Notification.objects.filter(recipient=request.user, verb="new friend request")
     n.delete()
     friends_suggestion = []
+    
     all_users= list(User.objects.all().values_list("id",flat = True))
     #friend_requests_sent= FriendRequests.objects.filter(sent_from=request.user).values()
     users_friends_user_id_list= list(request.user.friends_list.exclude(id=request.user.id).values_list("id",flat = True))
     friends_suggestion= list(User.objects.exclude(id= request.user.id).exclude(id__in=users_friends_user_id_list).values_list("id",flat=True))
-    print(users_friends_user_id_list)
-    print(all_users)
-    print(friends_suggestion)
+    #print(users_friends_user_id_list)
+    #print(all_users)
+    #print(friends_suggestion)
     users_requests_already_sent = list(FriendRequests.objects.filter(sent_from=request.user).values_list("sent_to_id",flat= True))
-    print(users_requests_already_sent)
+    #print(users_requests_already_sent,"ReqS")
     users_requests_already_recieved = list(FriendRequests.objects.filter(sent_to=request.user).values_list("sent_from_id",flat= True))
-    print(users_requests_already_recieved)
-    suggested_friends_profile  = list(Profile.objects.filter(user_id__in = friends_suggestion).values("slug","profile_image","user_id"))
-   # print(friends_suggestion)
-    #all_users= User.objects.all().values()
-#    friend_requests_sent= FriendRequests.objects.filter(sent_from=request.user).values()
-#    users_friends= request.user.friends_list.exclude(user=request.user).values()
-#    users_friends_user_list = [request.user.username]
-#    users_friends_user_id_list = [request.user.id]
-#    friend_suggestion_list=[]
-#    print(users_friends)()
-#    for friend in users_friends:
-#        users_friends_user_list.append(friend.user.username)
-#        users_friends_user_id_list.append(friend.user.id)
-#    friends_suggestion= User.objects.exclude(username__in=users_friends_user_list).values()
-#    users_requests_already_sent=[]
-#    users_requests_already_recieved=[]
-#    users_requests_sent_to=FriendRequests.objects.filter(sent_from=request.user).values()
-#    users_requests_recieved_from=FriendRequests.objects.filter(sent_to=request.user).values()
-#    for item in users_requests_sent_to:
-#        users_requests_already_sent.append(item.sent_to)
-#    for item in users_requests_recieved_from:
-#        users_requests_already_recieved.append(item.sent_from)     
-#    users_requests=FriendRequests.objects.filter(sent_from=request.user)|FriendRequests.objects.filter(sent_to=request.user).order_by("-time_sent")
+    suggested_friends_profile  = list(Profile.objects.filter(user_id__in = friends_suggestion).values())
+    profile_image_urls =[]
+    for item in suggested_friends_profile:
+        profile_image_urls.append(item["profile_image"].url)
+    suggested_friends_profile  = list(Profile.objects.filter(user_id__in = friends_suggestion).values("slug","user_id"))
+    i = 0
+    while i < len( profile_image_urls ):
+        suggested_friends_profile[i]["profile_image"] =  profile_image_urls[i]
+        i=i+1
     return JsonResponse({"suggested_friends_profile":suggested_friends_profile,"users_requests_already_sent":users_requests_already_sent,"users_requests_already_recieved":users_requests_already_recieved}, safe=False)
     #print(type(friends_suggestion))
 #    print(type(users_requests_already_sent))
@@ -170,7 +161,7 @@ def profile(request, slug):
     for item in auth_user_friends:
         auth_user_friends_users.append(item.user)
     req_slug=slug
-    user=get_object_or_404(User,username=req_slug)
+    user=get_object_or_404(User,username__iexact=req_slug)
     profiles_owner=user
     profiles_owner_bio=get_object_or_404(Profile,user=profiles_owner)
     friends=user.friends_list.all()
@@ -187,25 +178,6 @@ def profile(request, slug):
 "user_liked_post":user_liked_post
 }
     )
-#def suggested_user_list(request):
-#    friends_suggestion = []
-#    all_users= User.objects.all()
-#    friend_requests_sent= FriendRequests.objects.filter(sent_from=request.user)
-#    users_friends= request.user.friends_list.exclude(user=request.user)
-#    users_friends_user_list = []
-#    for friend in users_friends:
-#        users_friends_user_list.append(friend.user)
-#    print(users_friends_user_list)
-#    for friend in users_friends:
-#        friends_friend = friend.friends.all()
-#        #print(friend,friends_friend)
-#        for f in friends_friend:
-#            if f in users_friends_user_list or f == request.user:
-#                pass
-#            else:
-#                friends_suggestion.append(f)
-#    print(friends_suggestion)
-#    return render(request,"users/profile.html",{"friends_suggestion":friends_suggestion,friend_requests_sent:"friend_requests_sent"})
 
 def like_post(request):
     id=request.GET["id"]
@@ -230,16 +202,17 @@ def friend_list(request):
     return render(request,{"friends","friends"})
     
 def send_friend_request(request):
-    user=get_object_or_404(User,username=request.GET["username"])
+    user=get_object_or_404(User,username__iexact=request.GET["username"])
     #pik=request.GET["id"]
     #print(pik)
     f_request=FriendRequests(sent_from=request.user,sent_to=user)
     f_request.save()
     notify.send(sender = request.user, recipient = user, verb="new friend request")
+    print("yes")
     return HttpResponse("done")
     
 def cancel_friend_request(request):
-    user=get_object_or_404(User,username=request.GET["username"])
+    user=get_object_or_404(User,username__iexact=request.GET["username"])
     print(user)
  #   users_requests=FriendRequests.objects.filter(sent_from=request.user)&FriendRequests.objects.filter(sent_to=user)
     users_requests=FriendRequests.objects.get(sent_from=request.user, sent_to=user)
@@ -259,7 +232,7 @@ def make_post(request):
     return render(request,"users/make_post.html", {"form":form})
     
 def accept_friend_request(request):
-    user1=get_object_or_404(User,username=request.GET["username"])
+    user1=get_object_or_404(User,username__iexact=request.GET["username"])
     request.user.profile.friends.add(user1)
     user1.profile.friends.add(request.user)
     req= FriendRequests.objects.filter(sent_from=user1, sent_to=request.user).delete()
@@ -268,7 +241,8 @@ def accept_friend_request(request):
     return HttpResponse("done")
     
 def decline_friend_request(request):  
-    user1=get_object_or_404(User,username=request.GET["username"])
+    user1=get_object_or_404(User,username__iexact=request.GET["username"])
+    print("dddddddddddddx")
     req= FriendRequests.objects.filter(sent_from=user1, sent_to=request.user).delete()
     n= Notification.objects.filter(actor_object_id=user1.id,recipient=request.user, verb="new friend request")
     n.delete()
@@ -281,7 +255,7 @@ def register(request):
             form.save()
             users_name = request.POST["username"]
             users_email=request.POST["email"]
-            user_obj= User.objects.get(username= users_name)
+            user_obj= User.objects.get(username__iexact= users_name)
             Profile.objects.create(user=user_obj,email=users_email)
             return redirect("login")
     else:
@@ -290,10 +264,14 @@ def register(request):
     
 def profileupdate(request):        
     instance=  Profile.objects.filter(user=request.user).first()
+    profile_image_public_id =instance.profile_image.public_id
+    background_image_public_id = instance.background_image.public_id
     if request.method=="POST":        
         form = ProfileUpdateForm(request.POST, request.FILES, instance = instance )
-        if form.is_valid():            
-            form.save()
+        if form.is_valid():           
+            cloudinary.uploader.destroy(profile_image_public_id,invalidate=True)
+            cloudinary.uploader.destroy(background_image_public_id,invalidate=True)
+            form.save()            
             return redirect("profile", slug=instance.user.username)
     else:
         form = ProfileUpdateForm(instance = instance )
