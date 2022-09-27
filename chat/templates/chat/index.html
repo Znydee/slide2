@@ -8,6 +8,7 @@ body{
     background-color: #f4f7f6;
     margin-top:20px;
 }
+
 .card {
     background: #fff;
     transition: .5s;
@@ -59,7 +60,8 @@ body{
 }
 
 .people-list .chat-list img {
-    width: 45px;
+    width: 64px;
+    height:64px;
     border-radius: 50%
 }
 
@@ -85,8 +87,9 @@ body{
 
 .chat .chat-header img {
     float: left;
-    border-radius: 40px;
-    width: 40px
+    border-radius: 64px;
+    width: 64px;
+    height:64px;
 }
 
 .chat .chat-header .chat-about {
@@ -287,7 +290,7 @@ body{
   <div class="container-fluid" style="margin-top: 20px;">
         <h1 class="text-center" style="background:#4267B2;  color: white">Slide</h1>
 </div>
-
+{%if people %}
 <div class="container-fluid">
 <div class="row clearfix">
     <div class="col-lg-12">
@@ -304,7 +307,7 @@ body{
                 {%for item in people%}
                 {%if item.user.username != user.username%}
                     <li class="clearfix clearfix1" id={{item.user.username}}  name={{item.user.username}}>
-                        <img src="{{item.profile_image.url}}">
+                        <img class="sp-author-avatar" id=img{{item.user.username}} src="{{item.profile_image.url}}">
                         <div class="about">
                             <div class="name" >{{item.user.username}}</div>                                           
                         </div>
@@ -319,7 +322,7 @@ body{
                     <div class="row">
                         <div class="col-lg-6">
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-                                <img src="https://i0.wp.com/ifpo.org.uk/wp-content/uploads/2020/10/cropped-9-93879_computer-icons-user-image-person-silhouette-user-silhouettes-5.png" alt="avatar">
+                                <img src="" class="sp-author-avatar" alt="avatar" id="prof_header">
                             </a>
                             <div class="chat-about">
                                 <h6 class="m-b-0 nn"></h6>
@@ -351,6 +354,11 @@ body{
     </div>
 </div>
 </div>
+{%else%}
+<div class="container-fluid">
+<h3 class="text-center">You dont have any friends to chat with </h3>
+</div>
+{%endif%}
 <script src="{% static 'chat/notify.js' %}" type="text/javascript"></script>
 {% register_notify_callbacks callbacks='fill_notification_badge,my_special_notification_callback' %}
 <script type="text/javascript">
@@ -386,11 +394,14 @@ myFunction.call(this);
 });
 
 function myFunction(){
+var ins=$(this).attr("name");
+var ins2= '#img'+ins;
+var prof_head = $(ins2).attr("src");
+$("#prof_header").attr("src",prof_head);
 $(".spin").append('<div class="spinner-border" role="status"></div>');
 $(".badge-dark").text("");
 $(".clearfix1").removeClass("active");
 $(this).addClass("active");
-var ins=$(this).attr("name");
 $(".chat-history-list").empty();
 $.ajax({
       type:'GET',

@@ -12,7 +12,7 @@ from notifications.signals import notify
 def home(request):
     #people=User.objects.all()
     people = request.user.friends_list.all()
-    print(people)
+    #print(people)
     return render(request,"chat/index.html",{"people":people})
     
 def get_message(request):

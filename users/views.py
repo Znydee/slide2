@@ -88,9 +88,9 @@ def get_friends(request):
     
     all_users= list(User.objects.all().values_list("id",flat = True))
     #friend_requests_sent= FriendRequests.objects.filter(sent_from=request.user).values()
-    users_friends_user_id_list= list(request.user.friends_list.exclude(id=request.user.id).values_list("id",flat = True))
+    users_friends_user_id_list= list(request.user.friends_list.exclude(id=request.user.id).values_list("user_id",flat = True))
     friends_suggestion= list(User.objects.exclude(id= request.user.id).exclude(id__in=users_friends_user_id_list).values_list("id",flat=True))
-    #print(users_friends_user_id_list)
+    #print(users_friends_user_id_list,"user fr")
     #print(all_users)
     #print(friends_suggestion)
     users_requests_already_sent = list(FriendRequests.objects.filter(sent_from=request.user).values_list("sent_to_id",flat= True))
