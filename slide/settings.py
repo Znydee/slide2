@@ -158,9 +158,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "farouz98@gmail.com"
 #<<<<<<< HEAD
-EMAIL_HOST_PASSWORD = "gfefprobjejwxqfq"
-#=======
 EMAIL_HOST_PASSWORD = ""
+#=======
+#EMAIL_HOST_PASSWORD = ""
 
 #CHANNEL_LAYERS = {
 #    'default': {
@@ -175,7 +175,7 @@ django_heroku.settings(locals())
 #'127.0.0.1' '197.211.61.57'
 
 cloudinary.config( 
-  cloud_name = "dkxrj5brj", 
-  api_key = "921141168666277", 
-  api_secret = "_ePLDyUOhVldqDeU0TYZWGN8NPA" 
+  cloud_name = "", 
+  api_key = "", 
+  api_secret = "" 
 )
